@@ -10,8 +10,8 @@ export default function LeftSidebar() {
   const router = useRouter()
 
   return (
-    <section className='custom-scrollbar leftsidebar w-16 md:w-20 lg:w-64 transition-all duration-300 overflow-hidden ease-in-out px-0'>
-      <div className='flex w-full flex-1 flex-col gap-6 px-0 '>
+      <section className='custom-scrollbar w-full h-full transition-all duration-300 ease-in-out px-0 flex flex-col'>
+        <div className='flex w-full flex-1 flex-col gap-6 px-0 '>
       {sidebarLinks.map((link) => {
         const isActive=(pathname.includes(link.route)&&link.route.length>1)||pathname===link.route;
 
@@ -28,9 +28,9 @@ export default function LeftSidebar() {
                   return <Search size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
                 case 'activity':
                   return <Heart size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
-                case 'create thread':
+                case 'imagegenerator':
                   return <Users size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
-                case 'create community':
+                case 'community':
                   return <UserPlus size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />;
                 default:
                   return;

@@ -1,4 +1,4 @@
-import { Search, Home, Heart, Users, UserPlus, LogOut } from 'lucide-react'
+import { Search, Home, Heart, Users, UserPlus, LogOut } from "lucide-react";
 export const sidebarLinks = [
   {
     imgURL: Home,
@@ -17,13 +17,13 @@ export const sidebarLinks = [
   },
   {
     imgURL: Users,
-    route: "/create-thread",
-    label: "Create Thread",
+    route: "/imageGenerator",
+    label: "ImageGenerator",
   },
   {
     imgURL: UserPlus,
-    route: "/create-community",
-    label: "Create Community",
+    route: "/community",
+    label: "Community",
   },
 ];
 export const ProfileTabs = [
