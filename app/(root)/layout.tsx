@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Inter } from "next/font/google"
-import Topbar from "@/components/shared/Topbar";
-import LeftSidebar from "@/components/shared/LeftSiderbar";
 
 const inter=Inter({subsets:["latin"]});
 
@@ -23,21 +21,7 @@ export default function RootLayout({
         className={ inter.className }
       >
         <ClerkProvider>
-          <div className="flex flex-col h-screen">
-            <header className="h-16 bg-gray-900 border-b border-gray-800 z-50">
-              <Topbar />
-            </header>
-            <div className="flex flex-1 min-h-0">
-              <aside className="w-16 lg:w-64 bg-gray-900 border-r border-gray-800 z-40">
-                <LeftSidebar />
-              </aside>
-              <main className="flex-1 bg-gray-900 overflow-auto">
-                <div className="container mx-auto max-w-4xl p-6 min-h-full">
-                  {children}
-                </div>
-              </main>
-            </div>
-          </div>
+          {children}
         </ClerkProvider>
       </body>
     </html>

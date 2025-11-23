@@ -1,39 +1,247 @@
+'use client'
 import '../../app/globals.css'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
 import { OrganizationSwitcher, SignedIn, SignOutButton } from '@clerk/nextjs'
 import { dark } from '@clerk/themes'
-export default function Topbar() {
-  return (
-    <nav className='topbar'>
-        <Link href="/" className="flex items-center gap-4 no-underline">
-          <div className="flex items-center justify-center rounded-full bg-gray-800/50 p-1 sm:p-2 shadow-md transition-all duration-300 hover:shadow-lg">
-            <Image src="/logo.webp" alt="logo" width={28} height={28} className="object-contain sm:w-8 sm:h-8" />
-          </div>
-          <p className="text-heading3-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 font-semibold max-xsl:hidden">AiGenertor</p>
-        </Link>
+import { sidebarLinks } from "@/constants"
+import { usePathname } from 'next/navigation'
+import { LogOut, ChevronDown, Search, Menu, X } from 'lucide-react'
 
-        <div className='flex items-center gap-1'>
-          <div className='block md:hidden'>
-            <SignedIn>
-              <SignOutButton>
-                <div className='flex cursor-pointer'>
-                  <div className="flex items-center justify-center rounded-full bg-gray-800/50 p-1">
-                    <Image src='/logo.webp' alt='sign out' width={24} height={24} className="object-contain" />
+export default function Topbar() {
+  const pathname = usePathname()
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [navbarVisible, setNavbarVisible] = useState(true)
+  const [lastScrollTop, setLastScrollTop] = useState(0)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
+
+  // 分离Home链接和其他链接
+  const homeLink = sidebarLinks[0]
+  const dropdownLinks = sidebarLinks.slice(1)
+  
+  // 监听滚动事件，为导航栏添加滚动效果和隐藏/显示功能
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setScrolled(scrollTop > 10)
+      
+      // 检测滚动方向并更新导航栏显示状态
+      if (scrollTop > lastScrollTop && scrollTop > 10) {
+        // 向下滚动且超过一定距离时隐藏导航栏
+        setNavbarVisible(false)
+      } else {
+        // 向上滚动时显示导航栏
+        setNavbarVisible(true)
+      }
+      
+      setLastScrollTop(scrollTop)
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [lastScrollTop])
+  
+  // 点击外部区域关闭下拉菜单和移动菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false)
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+  
+  // 处理窗口大小变化，在大屏幕上自动关闭移动菜单
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false)
+      }
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  return (
+    <nav className={`fixed top-0 left-0 right-0 z-50 transform transition-all duration-300 cubic-bezier(0.34, 1.56, 0.64, 1) ${scrolled ? 'bg-gray-900/95 backdrop-blur-md shadow-lg shadow-black/20 py-2' : 'bg-gray-900/80 py-3'} ${navbarVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
+      {/* 添加一个细微的分隔线作为视觉辅助 */}
+      <div className={`absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent transform origin-bottom transition-transform duration-300 ${navbarVisible ? 'scale-x-100' : 'scale-x-0'}`}></div>
+      <div className="container mx-auto px-4 h-full">
+        <div className="flex items-center justify-between h-full">
+          {/* Logo and Brand */}
+          <Link href="/" className="flex items-center gap-3 no-underline group">
+            <div className="flex items-center justify-center rounded-full">
+              <Image src="/logo.webp" alt="logo" width={32} height={32} className="rounded-full object-cover transition-transform duration-700 group-hover:scale-110 rotate-3" />
+            </div>
+            <p className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-500 group-hover:from-blue-300 group-hover:to-purple-400 hidden sm:block">
+              AiGenerator
+            </p>
+          </Link>
+
+          {/* Mobile Menu Button - Only visible on small screens */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-gray-800/70 text-gray-300 hover:bg-gray-700/70 transition-all duration-300 z-50"
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? (
+              <X size={20} className="transition-transform duration-300" />
+            ) : (
+              <Menu size={20} className="transition-transform duration-300" />
+            )}
+          </button>
+          
+          {/* Mobile Menu - Slide in from left */}
+          <div 
+            className={`fixed inset-y-0 left-0 z-40 w-64 bg-gray-900/98 backdrop-blur-lg shadow-xl transform transition-transform duration-300 ease-in-out md:hidden ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+            ref={mobileMenuRef}
+          >
+            <div className="p-5 pt-16">
+              <div className="space-y-2">
+                {/* Home Link for mobile */}
+                <Link
+                  href={homeLink.route}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl w-full text-left transition-all duration-300 ${pathname === homeLink.route ? 'bg-blue-600/90 text-white' : 'text-gray-300 hover:bg-gray-800/70 hover:text-white'}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${pathname === homeLink.route ? 'bg-white/20' : 'bg-gray-800'}`}>
+                    <homeLink.imgURL size={18} />
                   </div>
-                </div>
-              </SignOutButton>
-            </SignedIn>
+                  <span className="font-medium">{homeLink.label}</span>
+                </Link>
+                
+                {/* Other links for mobile */}
+                {dropdownLinks.map((link) => {
+                  const isActive = (pathname.includes(link.route) && link.route.length > 1) || pathname === link.route;
+                  
+                  return (
+                    <Link
+                      key={link.label}
+                      href={link.route}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl w-full text-left transition-all duration-300 ${isActive ? 'bg-blue-600/90 text-white' : 'text-gray-300 hover:bg-gray-800/70 hover:text-white'}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${isActive ? 'bg-white/20' : 'bg-gray-800'}`}>
+                        <link.imgURL size={18} />
+                      </div>
+                      <span className="font-medium">{link.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+              
+              {/* Mobile logout button */}
+              <div className="mt-8">
+                <SignedIn>
+                  <SignOutButton redirectUrl="/sign-in">
+                    <button className='flex items-center gap-3 px-4 py-3 rounded-xl w-full bg-gray-800/70 text-gray-300 hover:bg-red-900/30 hover:text-red-400 transition-all duration-300'>
+                      <LogOut size={18} />
+                      <span className="font-medium">Logout</span>
+                    </button>
+                  </SignOutButton>
+                </SignedIn>
+              </div>
+            </div>
           </div>
-        <OrganizationSwitcher 
-        appearance={{
-          baseTheme:dark,
-          elements: {
-          organizationSwitcherTrigger:
-          "py-2 px-4"
-        }}} 
-        />
+          
+          {/* Navigation Links - Hidden on mobile, shown on larger screens */}
+          <div className="hidden md:flex items-center space-x-3">
+            {/* Home Link - Always visible */}
+            <Link
+              href={homeLink.route}
+              className={`flex items-center px-4 py-2.5 rounded-full transition-all duration-400 transform ${pathname === homeLink.route ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30 scale-105' : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-105'}`}
+            >
+              <homeLink.imgURL size={20} className="mr-2" />
+              <span className="hidden lg:inline-block">{homeLink.label}</span>
+            </Link>
+            
+            {/* Dropdown Menu for other links */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all duration-400 bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-105 ${dropdownOpen ? 'bg-gray-700/70 text-white scale-105' : ''}`}
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+              >
+                <span className="hidden lg:inline-block font-medium">Discover</span>
+                <ChevronDown 
+                  size={18} 
+                  className={`transition-transform duration-500 ease-in-out ${dropdownOpen ? 'rotate-180' : ''}`} 
+                />
+              </button>
+              
+              {/* Dropdown content with enhanced animation */}
+              <div 
+                className={`absolute top-full left-0 mt-2 w-60 rounded-xl shadow-2xl bg-gray-800/95 backdrop-blur-md border border-gray-700/50 z-50 overflow-hidden transition-all duration-500 ease-out transform origin-top-left ${dropdownOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-[-8px] pointer-events-none'}`}
+                aria-label="Navigation menu"
+              >
+                <div className="py-1">
+                  {dropdownLinks.map((link, index) => {
+                    const isActive = (pathname.includes(link.route) && link.route.length > 1) || pathname === link.route;
+                    
+                    return (
+                      <Link
+                        key={link.label}
+                        href={link.route}
+                        className={`flex items-center gap-3 px-5 py-3.5 w-full text-left transition-all duration-400 transform hover:translate-x-1 ${isActive ? 'bg-gradient-to-r from-blue-600/90 to-indigo-600/90 text-white' : 'text-gray-300 hover:bg-gray-700/60 hover:text-white'}`}
+                        onClick={() => setDropdownOpen(false)}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-transform duration-300 ${isActive ? 'bg-white/20' : 'bg-gray-700/50'}`}>
+                          <link.imgURL size={18} className="transition-transform duration-300 hover:scale-110"/>
+                        </div>
+                        <span className="font-medium">{link.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right section with user controls */}
+            <div className='flex items-center gap-3'>
+              {/* 搜索按钮（可选）- 保持与现有设计的一致性 */}
+              <Link 
+                href="/search" 
+                className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 transition-all duration-400 transform hover:scale-110 hover:bg-blue-900/20" 
+              >
+                <Search size={18} className="transition-transform duration-300 hover:scale-110" />
+              </Link>
+              
+              <SignedIn>
+                <SignOutButton redirectUrl="/sign-in">
+                  <button className='flex items-center gap-2 px-4 py-2.5 rounded-full bg-gray-800/50 text-gray-300 hover:bg-red-900/30 hover:text-red-400 transition-all duration-400 transform hover:scale-105 group'>
+                    <LogOut size={18} className="transition-transform duration-300 group-hover:rotate-12" />
+                    <span className="text-sm font-medium hidden sm:inline-block">Logout</span>
+                  </button>
+                </SignOutButton>
+              </SignedIn>
+              
+              <OrganizationSwitcher 
+                appearance={{
+                  baseTheme: dark,
+                  elements: {
+                    organizationSwitcherTrigger: "flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white font-medium transition-all duration-500 hover:from-blue-500/30 hover:to-purple-500/30 transform hover:scale-105 shadow-lg shadow-purple-500/20"
+                  }
+                }} 
+              />
+          </div>
         </div>
+      </div>
     </nav>
   )
 }
