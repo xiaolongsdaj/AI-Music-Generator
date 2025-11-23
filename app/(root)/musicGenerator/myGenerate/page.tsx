@@ -1,5 +1,6 @@
 import MusicHistory from '../../../../components/musicgeneratorui/MusicHistory';
 import Link from 'next/link';
+
 export default function MyGeneratePage() {
   return (
     <div className="min-h-full bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4 md:p-6 lg:p-8">

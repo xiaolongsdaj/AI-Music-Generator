@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MusicGenerateParams, MusicData } from '../types';
+import { protectApiRoute, getAuthSession } from '../../../../lib/auth-server';
 import fs from 'fs';
 import path from 'path';
 
 // 生成音乐的POST方法
 export async function POST(req: NextRequest) {
   try {
+    // 验证身份（使用统一的认证工具）
+    const { userId } = await protectApiRoute();
+
     // 从请求体中获取参数
     const params: MusicGenerateParams = await req.json();
     
@@ -20,9 +24,13 @@ export async function POST(req: NextRequest) {
     // 模拟API延迟
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // 生成模拟音乐数据
+    // 获取用户信息（可选）
+    const authSession = await getAuthSession();
+    
+    // 生成模拟音乐数据（包含用户ID）
     const generatedMusic: MusicData = {
       id: Date.now().toString(),
+      userId: userId, // 添加用户ID
       title: `${params.style.charAt(0).toUpperCase() + params.style.slice(1)} ${params.mood}`,
       description: params.description,
       style: params.style,
@@ -79,19 +87,39 @@ export async function POST(req: NextRequest) {
 // 获取音乐历史记录的GET方法
 export async function GET() {
   try {
+    // 验证身份（使用统一的认证工具）
+    const { userId } = await protectApiRoute();
+
     const musicDataPath = path.join(process.cwd(), 'data', 'musicdata', 'music.json');
+    
+    // 检查文件是否存在
+    if (!fs.existsSync(musicDataPath)) {
+      return NextResponse.json([], { 
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+    }
+
     const fileContent = fs.readFileSync(musicDataPath, 'utf8');
     const musicHistory = JSON.parse(fileContent);
     if (!Array.isArray(musicHistory)) {
       throw new Error('音乐历史数据格式错误');
     }
     
-    // 规范排版
-    const sortedHistory = musicHistory.sort((a, b) => {
+    // 只返回当前用户的音乐记录
+    const userMusicHistory = musicHistory.filter(
+      (music: MusicData) => music.userId === userId
+    );
+    
+    // 规范排版（按创建时间倒序，最新的在前）
+    const sortedHistory = userMusicHistory.sort((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateA - dateB;
+      return dateB - dateA; // 倒序排列
     });
+    
     await new Promise(resolve => setTimeout(resolve, 300));
     
     return NextResponse.json(sortedHistory, { 

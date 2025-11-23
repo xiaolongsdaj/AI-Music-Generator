@@ -1,6 +1,9 @@
 'use client'
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { MusicData, styleOptions, moodOptions } from '../../app/api/music/types';
+import { useAuth } from '../../lib/auth';
+import { fetchFromAPI } from '../../lib/api-client';
 import MusicPlayerModal from './MusicPlayerModal';
 
 export interface MusicHistoryProps {
@@ -8,27 +11,51 @@ export interface MusicHistoryProps {
 }
 
 const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
+  // 使用统一的认证 Hook
+  const { getToken, checkAuth, isSignedIn } = useAuth();
+  
   const [musicHistory, setMusicHistory] = useState<MusicData[]>([]);
   const [currentMusic, setCurrentMusic] = useState<MusicData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // 确保组件在客户端挂载
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // 从API获取音乐历史数据
   useEffect(() => {
     const fetchMusicHistory = async () => {
+      // 检查是否已登录（使用统一的认证检查）
+      if (!checkAuth()) {
+        setLoading(false);
+        setMusicHistory([]);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
-          const response = await fetch('/api/music/generate');
-          if (!response.ok) {
-            throw new Error('获取音乐历史记录失败');
-          }
-        const data = await response.json();
-        setMusicHistory(data);
+        // 调用 API（自动使用认证 token）
+        const result = await fetchFromAPI(
+          '/api/music/generate',
+          {},
+          getToken, // 传入 getToken 函数，自动处理认证
+          'GET'
+        );
+        
+        if (!result.success) {
+          throw new Error(result.error || '获取音乐历史记录失败');
+        }
+        
+        setMusicHistory(result.data as MusicData[]);
       } catch (err) {
         console.error('获取音乐历史记录时出错:', err);
-        setError('获取音乐历史记录失败');
+        const errorMessage = err instanceof Error ? err.message : '获取音乐历史记录失败';
+        setError(errorMessage);
         setMusicHistory([]);
       } finally {
         setLoading(false);
@@ -36,7 +63,7 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
     };
     
     fetchMusicHistory();
-  }, []);
+  }, [isSignedIn, getToken]);
   
   const handleSelectMusic = (music: MusicData) => {
     setCurrentMusic(music);
@@ -71,9 +98,9 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
 
   return (
     <section className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 shadow-xl">
+      
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">你的创作</h2>
-        <button className="text-blue-400 hover:text-blue-300 text-sm font-medium">查看全部</button>
       </div>
       
       {musicHistory.length > 0 ? (
@@ -105,15 +132,6 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
               
               <div className="flex justify-between items-center text-xs text-gray-500">
                 <span>{formatDate(music.createdAt)}</span>
-                <button 
-                  className="text-blue-400 hover:text-blue-300 font-medium"
-                  onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelectMusic(music);
-                }}
-              >
-                播放
-              </button>
               </div>
             </div>
           ))}
@@ -125,14 +143,6 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
       ) : (
         <div className="h-40 bg-gray-700/10 rounded-xl flex flex-col items-center justify-center">
           <p className="text-gray-400 mb-2">暂无生成记录</p>
-          <button 
-            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-            onClick={() => {
-              document.getElementById('description')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            开始生成你的第一首音乐
-          </button>
         </div>
       )}
       
@@ -141,12 +151,16 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
           {error}
         </div>
       )}
-
-      <MusicPlayerModal
-        isOpen={isPlayerModalOpen}
-        onClose={() => setIsPlayerModalOpen(false)}
-        music={currentMusic}
-      />
+      
+      {/* 使用 Portal 将模态框渲染到 document.body */}
+      {isMounted && typeof window !== 'undefined' && createPortal(
+        <MusicPlayerModal
+          isOpen={isPlayerModalOpen}
+          onClose={() => setIsPlayerModalOpen(false)}
+          music={currentMusic}
+        />,
+        document.body
+      )}
     </section>
   );
 };

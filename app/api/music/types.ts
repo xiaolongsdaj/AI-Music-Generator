@@ -1,6 +1,7 @@
 // 音乐数据类型定义
 export interface MusicData {
   id: string;
+  userId?: string; // 用户ID（可选，用于向后兼容）
   title: string;
   description: string;
   style: string;

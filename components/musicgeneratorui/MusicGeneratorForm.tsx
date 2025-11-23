@@ -1,33 +1,14 @@
 'use client'
 import React, { useState } from 'react';
 import { MusicData, styleOptions, moodOptions } from '../../app/api/music/types';
+import { useAuth } from '../../lib/auth';
+import { fetchFromAPI } from '../../lib/api-client';
 import MusicPlayerModal from './MusicPlayerModal';
 
-// 生成音乐API函数
-const generateMusicApi = async (params: {
-  description: string;
-  style: string;
-  mood: string;
-  duration: string;
-  tempo: string;
-}): Promise<MusicData> => {
-  const response = await fetch('/api/music/generate', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(params),
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || '生成音乐失败');
-  }
-  
-  return await response.json();
-};
-
 const MusicGeneratorForm = () => {
+  // 使用统一的认证 Hook
+  const { getToken, checkAuth } = useAuth();
+  
   // 音乐生成相关状态
   const [musicDescription, setMusicDescription] = useState('');
   const [musicStyle, setMusicStyle] = useState('');
@@ -41,27 +22,44 @@ const MusicGeneratorForm = () => {
   
   // 生成音乐处理函数
   const handleGenerateMusic = async () => {
+    // 检查是否已登录（使用统一的认证检查）
+    if (!checkAuth()) {
+      setError('请先登录后再生成音乐');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
     if (!musicDescription || !musicStyle || !mood) {
       setError('请填写完整的音乐描述和选择参数');
       setTimeout(() => setError(null), 3000);
       return;
     }
+    
     //重置错误状态
     setError(null);
     setIsGenerating(true);
     
     try {
-      // 调用API，获取数据
-      const music = await generateMusicApi({
-        description: musicDescription,
-        style: musicStyle,
-        mood: mood,
-        duration: duration,
-        tempo: tempo,
-      });
+      // 调用 API（自动使用认证 token）
+      const result = await fetchFromAPI(
+        '/api/music/generate',
+        {
+          description: musicDescription,
+          style: musicStyle,
+          mood: mood,
+          duration: duration,
+          tempo: tempo,
+        },
+        getToken, // 传入 getToken 函数，自动处理认证
+        'POST'
+      );
+      
+      if (!result.success) {
+        throw new Error(result.error || '生成音乐失败');
+      }
       
       // 保存生成的音乐数据
-      setGeneratedMusic(music);
+      setGeneratedMusic(result.data as MusicData);
       
       setIsPlayerModalOpen(true);
       
@@ -92,15 +90,22 @@ const MusicGeneratorForm = () => {
         </div>
       )}
       
-      <div className="space-y-5">
-        <div className="space-y-2">
+      <div className="space-y-5 w-full max-w-full">
+        <div className="space-y-2 w-full max-w-full">
           <label htmlFor="description" className="block text-sm font-medium text-gray-300">
             描述你的音乐
           </label>
           <textarea
             id="description"
             placeholder="描述你想要的音乐风格、主题或场景..."
-            className="w-full min-h-[120px] p-4 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+            className="w-full min-h-[120px] max-h-[300px] p-4 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+            style={{
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word',
+              boxSizing: 'border-box',
+              width: '100%',
+              maxWidth: '100%',
+            }}
             value={musicDescription}
             onChange={(e) => setMusicDescription(e.target.value)}
           />
