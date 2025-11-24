@@ -1,4 +1,5 @@
 import MusicHistory from '../../../../components/musicgeneratorui/MusicHistory';
+import Link from 'next/link';
 
 export default function MyGeneratePage() {
   return (

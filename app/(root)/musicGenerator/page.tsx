@@ -8,28 +8,56 @@ import FAQ from '@/components/musicgeneratorui/FAQ';
 import CTA from '@/components/musicgeneratorui/CTA';
 import { Music } from 'lucide-react';
 import { useEffect } from 'react';
+import musicGeneratorConfig from '@/data/musicgenerator/config.json';
 
 
 export default function MusicGenerator() {
   useEffect(() => {
     // 页面加载动画效果
     const handleScroll = () => {
-      const sections = document.querySelectorAll('section');
+      const sections = document.querySelectorAll('.scroll-reveal');
       sections.forEach(section => {
         const sectionTop = section.getBoundingClientRect().top;
+        const sectionBottom = section.getBoundingClientRect().bottom;
         const windowHeight = window.innerHeight;
-        if (sectionTop < windowHeight * 0.85) {
+        
+        // 当元素的顶部进入视口底部85%或底部进入视口顶部时触发
+        if (sectionTop < windowHeight * 0.85 || sectionBottom > 0) {
           section.classList.add('animate-in');
         }
       });
     };
     
-    // 初始加载时执行一次
-    handleScroll();
+    // 使用setTimeout确保DOM完全加载后再执行初始检查
+    const initialCheck = setTimeout(() => {
+      handleScroll();
+    }, 100);
     
-    // 监听滚动事件
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // 监听滚动事件，使用throttle优化性能
+    const throttledScroll = () => {
+      let waiting = false;
+      return () => {
+        if (!waiting) {
+          handleScroll();
+          waiting = true;
+          setTimeout(() => {
+            waiting = false;
+          }, 100);
+        }
+      };
+    };
+    
+    const throttledHandler = throttledScroll();
+    window.addEventListener('scroll', throttledHandler);
+    
+    // 监听resize事件以适应窗口大小变化
+    window.addEventListener('resize', handleScroll);
+    
+    return () => {
+      clearTimeout(initialCheck);
+      window.removeEventListener('scroll', throttledHandler);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
   
   return (
@@ -123,12 +151,49 @@ export default function MusicGenerator() {
         {/* 内容区域 */}
         <div className="mt-8">
           <MusicGeneratorForm />
-          <Hero />
-          <Description />
-          <Feature />
-          <Howto />
-          <FAQ />
-          <CTA />
+          {/* 将完整配置对象传递给组件，在组件内部解构 */}
+          <Hero 
+            config={{...musicGeneratorConfig.hero, className: `${musicGeneratorConfig.hero.className} scroll-reveal`}}
+          />
+          <Description 
+            config={{...musicGeneratorConfig.description, className: `${musicGeneratorConfig.description.className} scroll-reveal`}}
+          />
+          <Feature 
+            config={musicGeneratorConfig.feature}
+          />
+          <Howto 
+            config={{...musicGeneratorConfig.howto, 
+              steps: musicGeneratorConfig.howto.steps.map(step => ({
+                ...step,
+                gradientBg: step.gradientColor,
+                hoverBorderColor: step.titleColor.replace('text-', 'border-'),
+                shadowColor: step.titleColor.replace('text-', '')
+              }))
+            }}
+          />
+          <FAQ 
+            config={{
+              ...musicGeneratorConfig.faq, 
+              subtitle: musicGeneratorConfig.faq.description, // 将description重命名为subtitle以匹配组件Props
+              items: musicGeneratorConfig.faq.items.map(item => ({
+                ...item,
+                id: item.id.toString()
+              }))
+            }}
+          />
+          <CTA 
+            config={{
+              ...musicGeneratorConfig.cta,
+              title: musicGeneratorConfig.cta.title.text,
+              titleGradient: `bg-gradient-to-r ${musicGeneratorConfig.cta.title.gradientStart} ${musicGeneratorConfig.cta.title.gradientEnd}`,
+              buttons: musicGeneratorConfig.cta.buttons.map(button => ({
+                text: button.text,
+                className: button.gradientStart 
+                  ? `px-6 py-3 rounded-lg font-medium text-white bg-gradient-to-r ${button.gradientStart} ${button.gradientEnd} hover:from-${button.hoverGradientStart} hover:to-${button.hoverGradientEnd} transition-all duration-300 shadow-lg`
+                  : `px-6 py-3 rounded-lg font-medium ${button.textColor} ${button.bgColor} ${button.borderColor} hover:${button.hoverBgColor} transition-all duration-300`
+              }))
+            }}
+          />
         </div>
        </div>
       </div>

@@ -7,42 +7,42 @@ export default function Bottombar() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-4">
-              Creative Voice
+              创意之声
             </h3>
             <p className="text-gray-400">
-              Unleash AI creativity to craft endless possibilities in music and art
+              释放AI创造力，在音乐和艺术领域打造无限可能
             </p>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Products</h4>
+            <h4 className="text-white font-semibold mb-4">产品</h4>
             <ul className="space-y-2">
-              <li><Link href="/music-generator" className="text-gray-400 hover:text-white no-underline">Music Generation</Link></li>
-              <li><Link href="/image-generator" className="text-gray-400 hover:text-white no-underline">Image Generation</Link></li>
-              <li><Link href="/features" className="text-gray-400 hover:text-white no-underline">All Features</Link></li>
-              <li><Link href="/pricing" className="text-gray-400 hover:text-white no-underline">Pricing</Link></li>
+              <li><Link href="/music-generator" className="text-gray-400 hover:text-white no-underline">音乐生成</Link></li>
+              <li><Link href="/image-generator" className="text-gray-400 hover:text-white no-underline">图像生成</Link></li>
+              <li><Link href="/features" className="text-gray-400 hover:text-white no-underline">全部功能</Link></li>
+              <li><Link href="/pricing" className="text-gray-400 hover:text-white no-underline">价格</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Resources</h4>
+            <h4 className="text-white font-semibold mb-4">资源</h4>
             <ul className="space-y-2">
-              <li><Link href="/docs" className="text-gray-400 hover:text-white no-underline">Documentation</Link></li>
-              <li><Link href="/tutorials" className="text-gray-400 hover:text-white no-underline">Tutorials</Link></li>
-              <li><Link href="/community" className="text-gray-400 hover:text-white no-underline">Community</Link></li>
-              <li><Link href="/blog" className="text-gray-400 hover:text-white no-underline">Blog</Link></li>
+              <li><Link href="/docs" className="text-gray-400 hover:text-white no-underline">文档</Link></li>
+              <li><Link href="/tutorials" className="text-gray-400 hover:text-white no-underline">教程</Link></li>
+              <li><Link href="/community" className="text-gray-400 hover:text-white no-underline">社区</Link></li>
+              <li><Link href="/blog" className="text-gray-400 hover:text-white no-underline">博客</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
+            <h4 className="text-white font-semibold mb-4">公司</h4>
             <ul className="space-y-2">
-              <li><Link href="/about" className="text-gray-400 hover:text-white no-underline">About Us</Link></li>
-              <li><Link href="/contact" className="text-gray-400 hover:text-white no-underline">Contact Us</Link></li>
-              <li><Link href="/terms" className="text-gray-400 hover:text-white no-underline">Terms</Link></li>
-              <li><Link href="/privacy" className="text-gray-400 hover:text-white no-underline">Privacy Policy</Link></li>
+              <li><Link href="/about" className="text-gray-400 hover:text-white no-underline">关于我们</Link></li>
+              <li><Link href="/contact" className="text-gray-400 hover:text-white no-underline">联系我们</Link></li>
+              <li><Link href="/terms" className="text-gray-400 hover:text-white no-underline">服务条款</Link></li>
+              <li><Link href="/privacy" className="text-gray-400 hover:text-white no-underline">隐私政策</Link></li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-500">© 2025 Creative Voice. All rights reserved.</p>
+          <p className="text-gray-500">© 2025 创意之声。保留所有权利。</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link href="/" className="text-gray-400 hover:text-white no-underline">
               <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
