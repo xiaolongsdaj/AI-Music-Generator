@@ -1,23 +1,25 @@
 'use client'
 import { useState, useEffect, useRef } from 'react';
-import { MusicData } from '../../app/api/music/types';
 import { useAuth } from '../../lib/auth';
 import { fetchFromAPI } from '../../lib/api-client';
-import MusicPlayerModal from './MusicPlayerModal';
 import { useSubscriptionPermissions } from '@/lib/subscription-permissions';
-import { getMusicStyles, getMusicMoods, getAvailableDurations, getModelsBySubscriptionLevel, getHumanVoices } from '@/lib/model';
-
-// 导入参数配置系统
-import {
-  parameterConfigs,
-  parameterGroups,
-  modeConfigs,
-  getVisibleParameters,
-  getParameterDefaultValue,
-  formatParametersForAPI,
-  ParameterConfig,
-  ParameterGroup,
-} from '../../data/musicgenerator/parameterConfig';
+import MusicPlayerModal from './MusicPlayerModal';
+import { MusicData } from '@/interface/music';
+// 从统一配置文件导入模型相关函数
+import { 
+  getMusicStyles,//从音乐模态框配置文件导入音乐风格
+  getMusicMoods,//从音乐模态框配置文件导入情感氛围
+  getAvailableDurations,//从音乐模态框配置文件导入可用时长
+  getModelsBySubscriptionLevel,//从音乐模态框配置文件导入根据订阅等级获取模型函数
+  getHumanVoices,//从音乐模态框配置文件导入人声类型
+  //导入参数配置系统
+  parameterConfigs,//从音乐模态框配置文件导入参数配置
+  getVisibleParameters,//从音乐模态框配置文件导入可见参数
+  getParameterDefaultValue,//从音乐模态框配置文件导入默认参数值
+  formatParametersForAPI,//从音乐模态框配置文件导入格式化参数函数
+  ParameterConfig,//从音乐模态框配置文件导入参数配置项
+  ParameterGroup,//从音乐模态框配置文件导入参数组
+ } from '@/lib/musicModal';
 
 /**
  * 音乐生成器表单组件 - 支持多种音乐生成模式

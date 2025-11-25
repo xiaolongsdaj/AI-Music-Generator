@@ -1,5 +1,29 @@
-// 音乐生成器参数配置文件
-// 定义所有可能的音乐生成参数及其在不同模式下的行为
+// 统一的音乐生成配置文件
+// 整合模型配置和参数配置，避免重复定义
+
+/**
+ * 模型定义类型
+ */
+export type MusicModel = {
+  id: string;
+  name: string;
+  description: string;
+  minimumSubscriptionLevel: string;
+};
+
+export type ParameterOption = Option;
+
+/**
+ * 选项类型 - 用于select和multiselect类型的参数
+ */
+export type Option = {
+  value: string | number;
+  label: string;
+  free?: boolean;
+  description?: string;
+  icon?: string;
+  bpmRange?: string;
+};
 
 /**
  * 参数类型定义 - 支持多种输入控件类型
@@ -10,84 +34,155 @@ export type ParameterType = 'string' | 'number' | 'select' | 'textarea' | 'check
  * 参数可见性条件类型 - 灵活控制参数在不同场景下的显示
  */
 export type VisibilityCondition = {
-  mode?: string | string[]; // 适用的生成模式
-  subscriptionLevel?: string | string[]; // 适用的订阅级别
-  requiresFeature?: string; // 需要的特定功能权限
-  customCondition?: (values: Record<string, any>) => boolean; // 自定义条件函数
+  mode?: string | string[];
+  subscriptionLevel?: string | string[];
+  requiresFeature?: string;
+  customCondition?: (values: Record<string, any>) => boolean;
   dependsOn?: {
     paramId: string;
     values: any | any[];
-  }; // 依赖其他参数的值
-};
-
-/**
- * 参数选项类型 - 用于select和multiselect类型的参数
- */
-export type ParameterOption = {
-  value: string | number;
-  label: string;
-  free?: boolean; // 是否免费用户可用
-  description?: string; // 选项描述
-  icon?: string; // 选项图标
+  };
 };
 
 /**
  * 单个参数配置类型 - 完整的参数元数据定义
  */
-export interface ParameterConfig {
-  id: string; // 参数唯一标识符
-  label: string; // 显示标签
-  type: ParameterType; // 参数类型
-  group: string; // 参数分组
-  required?: boolean; // 是否必填
-  defaultValue?: any; // 默认值
-  placeholder?: string; // 占位文本
-  options?: ParameterOption[]; // 选择类型的选项
-  visibility?: VisibilityCondition; // 可见性条件
-  apiKey?: string; // API请求中使用的键名（如果与id不同）
+export type ParameterConfig = {
+  id: string;
+  label: string;
+  type: ParameterType;
+  group: string;
+  required?: boolean;
+  defaultValue?: any;
+  placeholder?: string;
+  options?: Option[];
+  visibility?: VisibilityCondition;
+  apiKey?: string;
   validation?: {
     minLength?: number;
     maxLength?: number;
     pattern?: RegExp;
     message?: string;
   };
-  description?: string; // 参数描述（可选）
-  tooltip?: string; // 提示文本
-  className?: string; // 自定义CSS类名
-  height?: string; // 文本区域高度
-  order?: number; // 参数在分组内的显示顺序
-}
+  description?: string;
+  tooltip?: string;
+  className?: string;
+  height?: string;
+  order?: number;
+};
 
 /**
  * 工具配置类型 - 用于扩展不同的音乐生成工具
  */
-export interface ToolConfig {
-  id: string; // 工具ID
-  name: string; // 工具名称
-  description: string; // 工具描述
-  icon?: string; // 工具图标
-  allowedModes?: string[]; // 支持的模式
-  customParameters?: ParameterConfig[]; // 工具专属参数
-}
+export type ToolConfig = {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  allowedModes?: string[];
+  customParameters?: ParameterConfig[];
+};
 
-// 参数分组配置
-export interface ParameterGroup {
-  id: string; // 分组ID
-  label: string; // 分组标签
-  order: number; // 显示顺序
-  description:string;
-  collapsible?: boolean; // 是否可折叠
-}
+export type ModeConfig = {
+  id: string;
+  name: string;
+  description?: string;
+  parameterGroups: string[];
+  defaultParameters?: Record<string, any>;
+};
 
-// 模式配置类型
-export interface ModeConfig {
-  id: string; // 模式ID
-  label: string; // 模式标签
-  description: string; // 模式描述
-  defaultParameters?: Record<string, any>; // 该模式下的默认参数值
-}
+/**
+ * 参数分组配置
+ */
+export type ParameterGroup = {
+  id: string;
+  label: string;
+  order: number;
+  description: string;
+  collapsible?: boolean;
+};
 
-// 定义所有参数分组
+// ModeConfig type already defined above
+
+/**
+ * 音乐生成模型配置
+ */
+export const AI_MODELS_CONFIG = {
+  // 音乐生成模型
+  musicGeneration: {
+    category: "音乐生成",
+    models: [
+      {
+        id: "Chirp v4.0",
+        name: "Chirp v4.0",
+        description: "擅长生成流行音乐旋律，适合短视频和社交媒体使用",
+        minimumSubscriptionLevel: "free"
+      },
+      {
+        id: "Chirp v4.5", 
+        name: "Chirp v4.5",
+        description: "专业古典和交响乐生成，适合电影配乐和商业项目",
+        minimumSubscriptionLevel: "standard"
+      },
+      {
+        id: "Chirp v5.0",
+        name: "Chirp v5.0",
+        description: "专业爵士音乐生成，风格纯正，即兴性强",
+        minimumSubscriptionLevel: "standard"
+      },
+      {
+        id: "Chirp v5.5",
+        name: "Chirp v5.5",
+        description: "生成地道的乡村和民谣风格音乐，温暖质朴",
+        minimumSubscriptionLevel: "enterprise"
+      }
+    ],
+    // 音乐风格选项
+    musicStyles: [
+      { value: "pop", label: "流行" },
+      { value: "classical", label: "古典" },
+      { value: "jazz", label: "爵士" },
+      { value: "rock", label: "摇滚" },
+      { value: "electronic", label: "电子" },
+      { value: "country", label: "乡村" },
+      { value: "folk", label: "民谣" },
+    ],
+    // 音乐情绪选项
+    musicMoods: [
+      { value: "happy", label: "欢快" },
+      { value: "sad", label: "悲伤" },
+      { value: "exciting", label: "激动" },
+      { value: "calm", label: "平静" },
+      { value: "mysterious", label: "神秘" },
+      { value: "inspiring", label: "鼓舞人心" },
+      { value: "romantic", label: "浪漫" },
+    ],
+    // 音乐速度选项
+    musicTempos: [
+      { value: "slow", label: "慢", bpmRange: "60-90" },
+      { value: "medium", label: "中等", bpmRange: "90-120" },
+      { value: "fast", label: "快", bpmRange: "120-160" }
+    ],
+    // 音乐时长选项（秒）
+    musicDurations: [
+      { value: "15", label: "15秒", free: true },
+      { value: "30", label: "30秒", free: true },
+      { value: "60", label: "60秒", free: false },
+      { value: "120", label: "120秒", free: false },
+      { value: "180", label: "180秒", free: false }
+    ],
+    // 人声音选项
+    humanVoices: [
+      { value: "random", label: "随机" },
+      { value: "male", label: "男声" },
+      { value: "female", label: "女声" },
+    ],
+  }
+};
+
+/**
+ * 参数分组配置
+ */
 export const parameterGroups: ParameterGroup[] = [
   {
     id: 'basic',
@@ -135,7 +230,9 @@ export const parameterGroups: ParameterGroup[] = [
   },
 ];
 
-// 定义支持的音乐生成工具
+/**
+ * 定义支持的音乐生成工具
+ */
 export const toolConfigs: ToolConfig[] = [
   {
     id: 'standard',
@@ -143,58 +240,46 @@ export const toolConfigs: ToolConfig[] = [
     description: '基础的AI音乐创作工具',
     allowedModes: ['inspiration', 'custom', 'instrumental'],
   },
-  // 未来可以添加更多工具
-  // {
-  //   id: 'vocalizer',
-  //   name: '人声转换工具',
-  //   description: '将文本转换为专业人声演唱',
-  //   allowedModes: ['custom'],
-  //   customParameters: [/* 工具专属参数 */],
-  // },
 ];
 
-// 定义不同模式下的专属参数
-export const inspirationModeParameters: ParameterConfig[] = [
-  // 灵感模式专属参数可以在这里添加
-];
+/**
+ * 定义可用的音乐生成模式
+ */
+export const inspirationModeParameters = ['inspiration', 'referenceArtist', 'referenceSong'];
+export const customModeParameters = ['musicStyle', 'mood', 'tempo', 'duration', 'instrument'];
+export const instrumentalModeParameters = ['musicStyle', 'mood', 'tempo', 'duration'];
+export const vocalModeParameters = ['musicStyle', 'mood', 'lyrics', 'vocals', 'language'];
 
-export const customModeParameters: ParameterConfig[] = [
-  // 自定义模式专属参数可以在这里添加
-];
-
-export const instrumentalModeParameters: ParameterConfig[] = [
-  // 纯音乐模式专属参数可以在这里添加
-];
-
-// 定义所有可用的音乐生成模式
 export const modeConfigs: ModeConfig[] = [
   {
     id: 'inspiration',
-    label: '灵感音乐',
-    description: '根据描述生成音乐',
-    defaultParameters: {
-      vocalType: 'random',
-    },
+    name: '灵感模式',
+    description: '根据给定的灵感生成音乐',
+    parameterGroups: ['inspiration'],
   },
   {
     id: 'custom',
-    label: '自定义音乐',
-    description: '根据歌词生成音乐',
-    defaultParameters: {
-      vocalType: 'random',
-    },
+    name: '自定义模式',
+    description: '完全自定义音乐参数',
+    parameterGroups: ['basic', 'advanced'],
   },
   {
     id: 'instrumental',
-    label: '纯音乐',
-    description: '生成纯器乐音乐',
-    defaultParameters: {
-      vocalType: null, // 纯音乐模式不需要人声
-    },
+    name: '纯音乐模式',
+    description: '生成不含人声的纯音乐',
+    parameterGroups: ['basic', 'advanced'],
+  },
+  {
+    id: 'vocal',
+    name: '人声模式',
+    description: '生成含有人声的音乐',
+    parameterGroups: ['basic', 'vocal', 'advanced'],
   },
 ];
 
-// 定义所有参数配置
+/**
+ * 定义所有参数配置
+ */
 export const parameterConfigs: ParameterConfig[] = [
   // 基本信息组
   {
@@ -203,8 +288,14 @@ export const parameterConfigs: ParameterConfig[] = [
     type: 'select',
     group: 'basic',
     required: true,
-    defaultValue: 'model-music-gen-1',
+    defaultValue: AI_MODELS_CONFIG.musicGeneration.models[0]?.id || 'model-music-gen-1',
     apiKey: 'modelId',
+    options: AI_MODELS_CONFIG.musicGeneration.models.map(model => ({
+      value: model.id,
+      label: model.name,
+      description: model.description,
+      free: model.minimumSubscriptionLevel === 'free'
+    })),
   },
   {
     id: 'musicName',
@@ -265,8 +356,9 @@ export const parameterConfigs: ParameterConfig[] = [
     type: 'select',
     group: 'style',
     required: true,
-    defaultValue: 'pop',
+    defaultValue: AI_MODELS_CONFIG.musicGeneration.musicStyles[0]?.value || 'pop',
     apiKey: 'style',
+    options: AI_MODELS_CONFIG.musicGeneration.musicStyles,
   },
   {
     id: 'mood',
@@ -274,8 +366,9 @@ export const parameterConfigs: ParameterConfig[] = [
     type: 'select',
     group: 'style',
     required: true,
-    defaultValue: 'happy',
+    defaultValue: AI_MODELS_CONFIG.musicGeneration.musicMoods[0]?.value || 'happy',
     apiKey: 'mood',
+    options: AI_MODELS_CONFIG.musicGeneration.musicMoods,
   },
   {
     id: 'vocalType',
@@ -283,11 +376,12 @@ export const parameterConfigs: ParameterConfig[] = [
     type: 'select',
     group: 'style',
     required: false,
-    defaultValue: 'random',
+    defaultValue: AI_MODELS_CONFIG.musicGeneration.humanVoices[0]?.value || 'random',
     apiKey: 'vocalType',
     visibility: {
       mode: ['inspiration', 'custom'], // 不在纯音乐模式显示
     },
+    options: AI_MODELS_CONFIG.musicGeneration.humanVoices,
   },
 
   // 音频设置组
@@ -297,8 +391,9 @@ export const parameterConfigs: ParameterConfig[] = [
     type: 'select',
     group: 'audio',
     required: true,
-    defaultValue: '15',
+    defaultValue: AI_MODELS_CONFIG.musicGeneration.musicDurations[0]?.value || '15',
     apiKey: 'duration',
+    options: AI_MODELS_CONFIG.musicGeneration.musicDurations,
   },
   {
     id: 'tempo',
@@ -306,13 +401,9 @@ export const parameterConfigs: ParameterConfig[] = [
     type: 'select',
     group: 'audio',
     required: true,
-    defaultValue: 'medium',
+    defaultValue: AI_MODELS_CONFIG.musicGeneration.musicTempos[0]?.value || 'medium',
     apiKey: 'tempo',
-    options: [
-      { value: 'slow', label: '慢' },
-      { value: 'medium', label: '中等' },
-      { value: 'fast', label: '快' },
-    ],
+    options: AI_MODELS_CONFIG.musicGeneration.musicTempos,
   },
 
   // 高级选项组
@@ -416,14 +507,8 @@ export const parameterConfigs: ParameterConfig[] = [
 
 /**
  * 获取指定模式和条件下的可见参数
- * @param mode 当前生成模式
- * @param subscriptionLevel 用户订阅级别
- * @param currentValues 当前参数值
- * @param featureAccess 可用功能权限列表
- * @param toolId 当前使用的工具ID
- * @returns 可见的参数配置列表
  */
-function getVisibleParameters(
+export function getVisibleParameters(
   mode: string, 
   subscriptionLevel: string, 
   currentValues: Record<string, any> = {},
@@ -483,8 +568,10 @@ function getVisibleParameters(
   }).sort((a, b) => (a.order || 0) - (b.order || 0)); // 按order排序
 }
 
-// 获取参数的默认值（考虑模式特定默认值）
-function getParameterDefaultValue(paramId: string, mode: string): any {
+/**
+ * 获取参数的默认值（考虑模式特定默认值）
+ */
+export function getParameterDefaultValue(paramId: string, mode: string): any {
   const param = parameterConfigs.find(p => p.id === paramId);
   if (!param) return undefined;
 
@@ -497,8 +584,10 @@ function getParameterDefaultValue(paramId: string, mode: string): any {
   return param.defaultValue;
 }
 
-// 将参数值转换为API请求格式
-function formatParametersForAPI(params: Record<string, any>, mode: string): Record<string, any> {
+/**
+ * 将参数值转换为API请求格式
+ */
+export function formatParametersForAPI(params: Record<string, any>, mode: string): Record<string, any> {
   const apiParams: Record<string, any> = {};
   const visibleParams = getVisibleParameters(mode, 'standard', params); // 简化处理，实际应传入正确的订阅级别
 
@@ -520,8 +609,55 @@ function formatParametersForAPI(params: Record<string, any>, mode: string): Reco
   return apiParams;
 }
 
-export {
-  getVisibleParameters,
-  getParameterDefaultValue,
-  formatParametersForAPI,
-};
+/**
+ * 根据订阅级别获取可用的模型
+ */
+export function getModelsBySubscriptionLevel(subscriptionLevel: string) {
+  const models = AI_MODELS_CONFIG.musicGeneration.models;
+  return models.filter(model => {
+    const modelLevel = model.minimumSubscriptionLevel;
+    if (subscriptionLevel === "premium") return true;
+    if (subscriptionLevel === "standard") return modelLevel !== "premium";
+    return modelLevel === "free";
+  });
+}
+
+/**
+ * 根据ID获取特定模型
+ */
+export function getModelById(modelId: string) {
+  const models = AI_MODELS_CONFIG.musicGeneration.models;
+  return models.find(model => model.id === modelId);
+}
+
+/**
+ * 获取所有音乐风格选项
+ */
+export function getMusicStyles() {
+  return AI_MODELS_CONFIG.musicGeneration.musicStyles;
+}
+
+/**
+ * 获取所有音乐情绪选项
+ */
+export function getMusicMoods() {
+  return AI_MODELS_CONFIG.musicGeneration.musicMoods;
+}
+
+/**
+ * 根据订阅级别获取可用的时长选项
+ */
+export function getAvailableDurations(subscriptionLevel: string) {
+  const durations = AI_MODELS_CONFIG.musicGeneration.musicDurations;
+  if (subscriptionLevel === "premium" || subscriptionLevel === "standard") {
+    return durations;
+  }
+  return durations.filter(duration => duration.free);
+}
+
+/**
+ * 获取所有人声类型选项
+ */
+export function getHumanVoices() {
+  return AI_MODELS_CONFIG.musicGeneration.humanVoices;
+}

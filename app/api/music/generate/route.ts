@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MusicGenerateParams, MusicData } from '../types';
+import { MusicGenerateParams } from '@/interface/api';
+import { MusicData } from '@/interface/music';
 import { protectApiRoute, getAuthSession } from '../../../../lib/auth-server';
 import fs from 'fs';
 import path from 'path';

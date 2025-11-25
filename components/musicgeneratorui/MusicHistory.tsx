@@ -1,10 +1,11 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { MusicData, styleOptions, moodOptions } from '../../app/api/music/types';
+import { MusicData } from '@/interface/music';
 import { useAuth } from '../../lib/auth';
 import { fetchFromAPI } from '../../lib/api-client';
 import MusicPlayerModal from './MusicPlayerModal';
+import { getMusicMoods, getMusicStyles } from '@/lib/musicModal';
 
 export interface MusicHistoryProps {
   onSelectMusic?: (music: MusicData) => void;
@@ -20,6 +21,8 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
   const [error, setError] = useState<string | null>(null);
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const styleOptions = getMusicStyles();
+  const moodOptions = getMusicMoods();
   
   // 确保组件在客户端挂载
   useEffect(() => {
@@ -113,10 +116,7 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
             >
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="text-lg font-medium text-white">{music.name || music.title}</h3>
-                  {music.name && music.title && music.name !== music.title && (
-                    <p className="text-xs text-gray-400">{music.title}</p>
-                  )}
+                  <h3 className="text-lg font-medium text-white">{music.name}</h3>
                 </div>
                 <span className="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-300">{music.duration}秒</span>
               </div>

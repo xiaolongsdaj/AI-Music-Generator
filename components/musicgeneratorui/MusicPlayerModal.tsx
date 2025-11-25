@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
-import { MusicData, styleOptions, moodOptions } from '../../app/api/music/types';
+import { MusicData } from '@/interface/music';
+import { getMusicMoods, getMusicStyles } from '@/lib/musicModal';
 
 // 音乐播放模态框组件
 export interface MusicPlayerModalProps {
@@ -17,6 +18,8 @@ const MusicPlayerModal: React.FC<MusicPlayerModalProps> = ({ isOpen, onClose, mu
   const [audioProgress, setAudioProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const styleOptions = getMusicStyles();
+  const moodOptions = getMusicMoods();
   
   useEffect(() => {
     if (!isOpen && audioRef.current) {
@@ -152,10 +155,7 @@ const MusicPlayerModal: React.FC<MusicPlayerModalProps> = ({ isOpen, onClose, mu
           </div>
           
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-white mb-2">{music.name || music.title}</h3>
-            {music.name && music.title && music.name !== music.title && (
-              <p className="text-sm text-gray-400 mb-1">{music.title}</p>
-            )}
+            <h3 className="text-xl font-semibold text-white mb-2">{music.name}</h3>
             <p className="text-gray-300 mb-3 text-sm md:text-base">{music.description}</p>
             <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-xs md:text-sm text-gray-400">
               <span className="px-2 py-1 rounded-full bg-gray-700/30">{styleOptions.find(s => s.value === music.style)?.label || music.style}</span>
