@@ -2,15 +2,43 @@
 import Link from 'next/link'
 import { sidebarLinks, musicSidebarLinks } from "@/constants";
 import { usePathname, useRouter } from 'next/navigation'
-import {SignedIn, SignOutButton, useAuth} from '@clerk/nextjs';
+import {SignedIn, SignOutButton, useAuth, useUser} from '@clerk/nextjs';
 import { LogOut, Volume2, Gift } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { subscriptionManager, UserSubscription } from '@/lib/subscription-permissions';
 
 export default function LeftSidebar() {
   const pathname = usePathname()
+  const router = useRouter();
   const { userId } = useAuth();
+  const { user } = useUser();
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   
   // 判断是否在音乐生成器页面
   const isMusicGeneratorPage = pathname.includes('/musicGenerator');
+  
+  // 获取订阅信息
+  useEffect(() => {
+    if (userId) {
+      const getSubscription = async () => {
+        try {
+          const subscriptionInfo = subscriptionManager.getSubscription();
+          setSubscription(subscriptionInfo);
+        } catch (error) {
+          console.error('获取订阅信息失败:', error);
+          // 出错时设置默认订阅
+          setSubscription({
+            plan: 'free',
+            subscriptionId: 'default-subscription',
+            nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            isActive: true
+          });
+        }
+      };
+      
+      getSubscription();
+    }
+  }, [userId]);
   
   // 从constants导入的音乐侧边栏链接配置已在上方导入
 
@@ -49,17 +77,21 @@ export default function LeftSidebar() {
               </div>
               
               <div className="mt-auto w-full">
-                {/* 积分区域 */}
+                
                 <div className="p-4 rounded-xl bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-blue-800/30 hidden md:block">
                   <div className="flex items-center gap-2 mb-2">
                     <Gift className="w-5 h-5 text-blue-400" />
-                    <h3 className="font-semibold text-blue-400">积分</h3>
+                    <h3 className="font-semibold text-blue-400">订阅信息</h3>
                   </div>
-                  <p className="text-gray-300 text-sm">当前积分: 25</p>
-                  <p className="text-gray-400 text-xs mt-1">每日签到可获得5积分</p>
-                  <Link href="#" className="text-xs text-blue-400 hover:underline mt-2 inline-block">
-                    升级高级账户
-                  </Link>
+                  <p className="text-gray-300 text-sm mt-2">当前订阅: {subscription?.plan || '免费'}</p>
+                  <Link href="/musicGenerator/pricing" className="text-xs text-blue-400 hover:underline mt-2 inline-block sm:mt-0"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          router.push('/musicGenerator/pricing');
+                        }}
+                      >
+                      升级订阅
+                    </Link>
                 </div>
                 
                 {/* 登录状态 */}
@@ -70,7 +102,7 @@ export default function LeftSidebar() {
                         <Volume2 className="w-5 h-5 text-white" />
                       </div>
                       <div className="hidden md:block text-center">
-                        <p className="text-sm font-medium">用户账户</p>
+                        <p className="text-sm font-medium">当前用户: {user?.emailAddresses[0]?.emailAddress || ''}</p>
                         <SignOutButton>
                           <button className="mt-2 px-3 py-1 text-xs text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-md transition-all duration-200">
                             登出

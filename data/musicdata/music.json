@@ -58,5 +58,65 @@
     "tempo": "medium",
     "audioUrl": "https://example.com/music_1763953142139.mp3",
     "createdAt": "2025-11-24T02:59:02.139Z"
+  },
+  {
+    "id": "1763977500386",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "title": "Rock exciting",
+    "description": "1232131",
+    "style": "rock",
+    "mood": "exciting",
+    "duration": 30,
+    "tempo": "medium",
+    "audioUrl": "https://example.com/music_1763977500386.mp3",
+    "createdAt": "2025-11-24T09:45:00.386Z"
+  },
+  {
+    "id": "1763977540088",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "title": "Rock sad",
+    "description": "1231231231",
+    "style": "rock",
+    "mood": "sad",
+    "duration": 120,
+    "tempo": "fast",
+    "audioUrl": "https://example.com/music_1763977540088.mp3",
+    "createdAt": "2025-11-24T09:45:40.088Z"
+  },
+  {
+    "id": "1763977573137",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "title": "Rock sad",
+    "description": "12312312",
+    "style": "rock",
+    "mood": "sad",
+    "duration": 120,
+    "tempo": "medium",
+    "audioUrl": "https://example.com/music_1763977573137.mp3",
+    "createdAt": "2025-11-24T09:46:13.137Z"
+  },
+  {
+    "id": "1764032822467",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "title": "Classical happy",
+    "description": "123212",
+    "style": "classical",
+    "mood": "happy",
+    "duration": 30,
+    "tempo": "fast",
+    "audioUrl": "https://example.com/music_1764032822467.mp3",
+    "createdAt": "2025-11-25T01:07:02.467Z"
+  },
+  {
+    "id": "1764040447870",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "title": "Electronic sad",
+    "description": "请问请问",
+    "style": "electronic",
+    "mood": "sad",
+    "duration": 30,
+    "tempo": "medium",
+    "audioUrl": "https://example.com/music_1764040447870.mp3",
+    "createdAt": "2025-11-25T03:14:07.870Z"
   }
 ]

@@ -1,4 +1,15 @@
-import { Search, Home, Heart, UserPlus, Music, Image, Disc, Radio, FileText, PlusSquare } from "lucide-react";
+import {
+  Search,
+  Home,
+  Heart,
+  UserPlus,
+  Music,
+  Image,
+  Disc,
+  Radio,
+  FileText,
+  PlusSquare,
+} from "lucide-react";
 //侧边栏遍历
 export const sidebarLinks = [
   {
@@ -21,10 +32,10 @@ export const sidebarLinks = [
 // 音乐生成器侧边栏链接
 export const musicSidebarLinks = [
   {
-    id: 'inspiration',
+    id: "inspiration",
     icon: Music,
-    label: '生成音乐',
-    route: '/musicGenerator',
+    label: "生成音乐",
+    route: "/musicGenerator",
   },
   // {
   //   id: 'custom',
@@ -45,9 +56,21 @@ export const musicSidebarLinks = [
   //   route: '/musicGenerator/lyrics',
   // },
   {
-    id: 'myGenerates',
+    id: "myGenerates",
     icon: PlusSquare,
-    label: '查看我的生成',
-    route: '/musicGenerator/myGenerate',
-  }
+    label: "查看我的生成",
+    route: "/musicGenerator/myGenerate",
+  },
+  {
+    id: "pricing",
+    icon: Disc,
+    label: "订阅",
+    route: "/musicGenerator/pricing",
+  },
+  {
+    id: "account",
+    icon: UserPlus,
+    label: "账号",
+    route: "/musicGenerator/account",
+  },
 ];

@@ -23,10 +23,6 @@ export async function POST(req: NextRequest) {
     
     // 模拟API延迟
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // 获取用户信息（可选）
-    const authSession = await getAuthSession();
-    
     // 生成模拟音乐数据（包含用户ID）
     const generatedMusic: MusicData = {
       id: Date.now().toString(),

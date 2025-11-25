@@ -4,21 +4,25 @@ import { MusicData, styleOptions, moodOptions } from '../../app/api/music/types'
 import { useAuth } from '../../lib/auth';
 import { fetchFromAPI } from '../../lib/api-client';
 import MusicPlayerModal from './MusicPlayerModal';
+import { useSubscriptionPermissions } from '@/lib/subscription-permissions';
 
 const MusicGeneratorForm = () => {
   // 使用统一的认证 Hook
   const { getToken, checkAuth } = useAuth();
+  // 使用订阅权限 Hook
+  const { canUseFeature, getSubscriptionDisplayInfo } = useSubscriptionPermissions();//检查用户是否有使用某个功能的权限
   
   // 音乐生成相关状态
-  const [musicDescription, setMusicDescription] = useState('');
-  const [musicStyle, setMusicStyle] = useState('');
-  const [mood, setMood] = useState('');
-  const [duration, setDuration] = useState('30');
-  const [tempo, setTempo] = useState('medium');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedMusic, setGeneratedMusic] = useState<MusicData | null>(null);
-  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [musicDescription, setMusicDescription] = useState('');//音乐描述
+  const [musicStyle, setMusicStyle] = useState('');//音乐风格
+  const [mood, setMood] = useState('');//音乐情感
+  const [duration, setDuration] = useState('30');//音乐时长
+  const [tempo, setTempo] = useState('medium');//音乐速度
+  const [isGenerating, setIsGenerating] = useState(false);//是否正在生成音乐
+  const [generatedMusic, setGeneratedMusic] = useState<MusicData | null>(null);//生成的音乐数据
+  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);//是否打开音乐播放器弹窗
+  const [error, setError] = useState<string | null>(null);//错误信息
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);//是否显示升级提示弹窗
   
   // 生成音乐处理函数
   const handleGenerateMusic = async () => {
@@ -34,24 +38,29 @@ const MusicGeneratorForm = () => {
       setTimeout(() => setError(null), 3000);
       return;
     }
+
+    // 权限检查：检查是否尝试使用高级功能
+    const requestedDuration = parseInt(duration);
+    const isUsingAdvancedFeatures = requestedDuration > 30;
     
-    //重置错误状态
-    setError(null);
+    if (isUsingAdvancedFeatures && !canUseFeature('custom-parameters')) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+
     setIsGenerating(true);
+    setError(null);
     
     try {
-      // 调用 API（自动使用认证 token）
-      const result = await fetchFromAPI(
-        '/api/music/generate',
-        {
-          description: musicDescription,
-          style: musicStyle,
-          mood: mood,
-          duration: duration,
-          tempo: tempo,
-        },
-        getToken, // 传入 getToken 函数，自动处理认证
-        'POST'
+      const result = await fetchFromAPI('/api/music/generate', {
+        description: musicDescription,
+        style: musicStyle,
+        mood: mood,
+        duration: duration,
+        tempo: tempo,
+      },
+      getToken,
+      'POST'
       );
       
       if (!result.success) {
@@ -62,124 +71,127 @@ const MusicGeneratorForm = () => {
       setGeneratedMusic(result.data as MusicData);
       
       setIsPlayerModalOpen(true);
-      
-      setMusicDescription('');
-      setMusicStyle('');
-      setMood('');
-    } catch (error) {
-      console.error('生成音乐失败:', error);
-      const errorMessage = error instanceof Error ? error.message : '生成音乐失败，请重试';
-      setError(errorMessage);
-      setTimeout(() => setError(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '生成音乐时出现错误');
     } finally {
       setIsGenerating(false);
     }
   };
 
+  // 处理时长选择（根据权限控制）
+  const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newDuration = e.target.value;
+    const durationSeconds = parseInt(newDuration);
+    
+    // 检查是否选择了高级功能但没有权限
+    if (durationSeconds > 30 && !canUseFeature('custom-parameters')) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    
+    setDuration(newDuration);
+  };
+
   return (
-    <section className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-2xl p-4 md:p-6 mb-10 border border-gray-700/50 shadow-xl">
-      <h2 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6">生成你的音乐</h2>
-      {error && (
-        <div className="bg-red-900/20 border border-red-700/30 rounded-xl p-4 mb-4 animate-fade-in">
-          <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-red-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        </div>
-      )}
-      
-      <div className="space-y-5 w-full max-w-full">
-        <div className="space-y-2 w-full max-w-full">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-300">
-            描述你的音乐
+    <div className="max-w-2xl mx-auto">
+      <div className="space-y-6">
+        {/* 音乐描述输入 */}
+        <div>
+          <label htmlFor="musicDescription" className="block text-sm font-medium text-white mb-1">
+            音乐描述
           </label>
           <textarea
-            id="description"
-            placeholder="描述你想要的音乐风格、主题或场景..."
-            className="w-full min-h-[120px] max-h-[300px] p-4 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
-            style={{
-              wordWrap: 'break-word',
-              overflowWrap: 'break-word',
-              boxSizing: 'border-box',
-              width: '100%',
-              maxWidth: '100%',
-            }}
+            id="musicDescription"
+            className="w-full p-4 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all h-32 resize-y"
+            placeholder="描述您想要生成的音乐风格、情感和氛围..."
             value={musicDescription}
             onChange={(e) => setMusicDescription(e.target.value)}
           />
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <label htmlFor="style" className="block text-sm font-medium text-gray-300">
-              音乐风格
+
+        {/* 风格选择 */}
+        <div>
+          <label htmlFor="musicStyle" className="block text-sm font-medium text-white mb-1">
+            音乐风格
+          </label>
+          <select
+            id="musicStyle"
+            className="w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            value={musicStyle}
+            onChange={(e) => setMusicStyle(e.target.value)}
+          >
+            <option value="">选择音乐风格</option>
+            {styleOptions.map((style) => (
+              <option key={style.value} value={style.value}>{style.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* 情绪选择 */}
+        <div>
+          <label htmlFor="mood" className="block text-sm font-medium text-white mb-1">
+            音乐情绪
+          </label>
+          <select
+            id="mood"
+            className="w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            value={mood}
+            onChange={(e) => setMood(e.target.value)}
+          >
+            <option value="">选择音乐情绪</option>
+            {moodOptions.map((moodOption) => (
+              <option key={moodOption.value} value={moodOption.value}>{moodOption.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* 时长选择 - 带权限控制 */}
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <label htmlFor="duration" className="block text-sm font-medium text-white">
+              音乐时长
             </label>
-            <select
-              id="style"
-              className="w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              value={musicStyle}
-              onChange={(e) => setMusicStyle(e.target.value)}
-            >
-              <option value="">选择风格</option>
-              {styleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            {!canUseFeature('custom-parameters') && (
+              <span className="text-xs text-blue-400">高级用户可用更长时长</span>
+            )}
           </div>
-          <div className="space-y-2">
-            <label htmlFor="mood" className="block text-sm font-medium text-gray-300">
-              情绪
-            </label>
-            <select
-              id="mood"
-              className="w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              value={mood}
-              onChange={(e) => setMood(e.target.value)}
-            >
-              <option value="">选择情绪</option>
-              {moodOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="duration" className="block text-sm font-medium text-gray-300">
-              时长 (秒)
-            </label>
-            <select
-              id="duration"
-              className="w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-            >
-              <option value="15">15</option>
-              <option value="30">30</option>
-              <option value="60">60</option>
-              <option value="120">120</option>
-            </select>
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="tempo" className="block text-sm font-medium text-gray-300">
-              速度
-            </label>
-            <select
-              id="tempo"
-              className="w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              value={tempo}
-              onChange={(e) => setTempo(e.target.value)}
-            >
-              <option value="slow">慢</option>
-              <option value="medium">中等</option>
-              <option value="fast">快</option>
-            </select>
-          </div>
+          <select
+            id="duration"
+            className={`w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${!canUseFeature('custom-parameters') ? 'cursor-not-allowed' : ''}`}
+            value={duration}
+            onChange={handleDurationChange}
+          >
+            <option value="15">15秒</option>
+            <option value="30">30秒</option>
+            {canUseFeature('custom-parameters') ? (
+              <>
+                <option value="60">60秒</option>
+                <option value="120">120秒</option>
+              </>
+            ) : (
+              <>
+                <option value="60" disabled>60秒 (高级用户)</option>
+                <option value="120" disabled>120秒 (高级用户)</option>
+              </>
+            )}
+          </select>
+        </div>
+
+        {/* 速度选择 */}
+        <div>
+          <label htmlFor="tempo" className="block text-sm font-medium text-white mb-1">
+            音乐速度
+          </label>
+          <select
+            id="tempo"
+            className="w-full p-3 bg-gray-700/40 border border-gray-600/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            value={tempo}
+            onChange={(e) => setTempo(e.target.value)}
+          >
+            <option value="slow">慢</option>
+            <option value="medium">中等</option>
+            <option value="fast">快</option>
+          </select>
         </div>
         
         <button
@@ -198,12 +210,58 @@ const MusicGeneratorForm = () => {
           ) : '生成音乐'}
         </button>
       </div>
-      <MusicPlayerModal
-        isOpen={isPlayerModalOpen}
-        onClose={() => setIsPlayerModalOpen(false)}
-        music={generatedMusic}
-      />
-    </section>
+
+      {/* 错误提示 */}
+      {error && (
+        <div className="mt-4 p-3 bg-red-900/30 border border-red-700/30 rounded-lg text-red-300">
+          {error}
+        </div>
+      )}
+
+      {/* 订阅计划提示 - 显示当前订阅状态 */}
+      <div className="mt-4 text-center text-sm text-gray-400">
+        <p>当前订阅: <span className="text-blue-400 font-medium">{getSubscriptionDisplayInfo().planName}</span></p>
+        <a href="/musicGenerator/pricing" className="text-blue-400 hover:underline mt-1 inline-block">升级订阅以解锁更多功能</a>
+      </div>
+
+      {/* 音乐播放器模态框 */}
+      {isPlayerModalOpen && (
+        <MusicPlayerModal 
+          isOpen={isPlayerModalOpen}
+          music={generatedMusic!}
+          onClose={() => setIsPlayerModalOpen(false)}
+        />
+      )}
+
+      {/* 升级提示弹窗 */}
+      {showUpgradePrompt && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-700/50 shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-3">需要升级订阅</h3>
+            <p className="text-gray-300 mb-5">
+              您正在尝试使用高级功能，这需要升级到标准版或企业版订阅。
+            </p>
+            <div className="space-y-3">
+              <button
+                className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl text-white font-bold transition-all"
+                onClick={() => {
+                  setShowUpgradePrompt(false);
+                  window.location.href = '/pricing';
+                }}
+              >
+                查看订阅计划
+              </button>
+              <button
+                className="w-full py-3 px-6 bg-gray-700/50 hover:bg-gray-700 rounded-xl text-white font-medium transition-all"
+                onClick={() => setShowUpgradePrompt(false)}
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

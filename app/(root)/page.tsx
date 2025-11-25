@@ -4,9 +4,9 @@ import { Music, Image } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import Topbar from '@/components/shared/Topbar';
 import Bottombar from '@/components/shared/Bottombar';
+import ParticleBackground from '@/components/shared/ParticleBackground';
 
 export default function Home() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // 鼠标跟踪效果
   const mousePosition = useRef({ x: 0, y: 0 });
@@ -35,149 +35,7 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // 设置canvas尺寸
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // 粒子类
-    class Particle {
-      x: number;
-      y: number;
-      size: number;
-      speedX: number;
-      speedY: number;
-      color: string;
-      originalX: number;
-      originalY: number;
-
-      constructor() {
-        this.x = Math.random() * (canvas?.width || window.innerWidth);
-        this.y = Math.random() * (canvas?.height || window.innerHeight);
-        this.originalX = this.x;
-        this.originalY = this.y;
-        this.size = Math.random() * 3 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.5;
-        this.speedY = (Math.random() - 0.5) * 0.5;
-        // 生成紫色到蓝色的渐变
-        const hue = Math.random() * 60 + 240; // 240-300 (紫色到蓝色)
-        this.color = `hsl(${hue}, 80%, 60%)`;
-      }
-
-      update() {
-        // 基础移动
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        // 鼠标交互 - 粒子远离鼠标
-        const dx = this.x - mousePosition.current.x;
-        const dy = this.y - mousePosition.current.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const force = 2000 / (distance * distance); // 反平方力
-
-        if (distance < 150) {
-          this.x += (dx / distance) * force;
-          this.y += (dy / distance) * force;
-        }
-
-        // 边界检查
-        if (this.x < 0 || this.x > (canvas?.width || window.innerWidth)) this.speedX *= -1;
-        if (this.y < 0 || this.y > (canvas?.height || window.innerHeight)) this.speedY *= -1;
-        
-        // 缓慢回到原始位置
-        const backToOriginalSpeed = 0.001;
-        this.x += (this.originalX - this.x) * backToOriginalSpeed;
-        this.y += (this.originalY - this.y) * backToOriginalSpeed;
-      }
-
-      draw() {
-        if (!ctx) return;
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 添加发光效果
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 10;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-    }
-
-    // 创建粒子
-    const particlesArray: Particle[] = [];
-    const numberOfParticles = Math.floor(window.innerWidth / 15); // 减少粒子数量提高性能
-
-    for (let i = 0; i < numberOfParticles; i++) {
-      particlesArray.push(new Particle());
-    }
-
-    // 连接粒子的函数
-    const connectParticles = () => {
-      if (!ctx) return;
-      const opacityValue = 1;
-      for (let a = 0; a < particlesArray.length; a++) {
-        for (let b = a; b < particlesArray.length; b++) {
-          const dx = particlesArray[a].x - particlesArray[b].x;
-          const dy = particlesArray[a].y - particlesArray[b].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 100) {
-            const opacity = opacityValue - distance / 100;
-            // 根据距离变化线条颜色
-            const gradient = ctx.createLinearGradient(
-              particlesArray[a].x,
-              particlesArray[a].y,
-              particlesArray[b].x,
-              particlesArray[b].y
-            );
-            gradient.addColorStop(0, particlesArray[a].color);
-            gradient.addColorStop(1, particlesArray[b].color);
-            
-            ctx.strokeStyle = gradient;
-            ctx.globalAlpha = opacity * 0.3;
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-            ctx.stroke();
-            ctx.globalAlpha = 1;
-          }
-        }
-      }
-    };
-
-    // 动画循环
-    const animate = () => {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particlesArray.forEach(particle => {
-        particle.update();
-        particle.draw();
-      });
-      connectParticles();
-      requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    // 清理
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-    };
-  }, []);
+  // 使用可复用的ParticleBackground组件，移除了原有的canvas粒子背景代码
 
   // 创建refs用于观察
   const featuresRef = useRef<HTMLDivElement>(null);
@@ -225,10 +83,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative px-0">
-      {/* 粒子动效背景 */}
-      <div className="absolute inset-0 z-0">
-        <canvas ref={canvasRef} className="w-full h-full opacity-30"></canvas>
-      </div>
+      {/* 使用粒子背景组件 */}
+      <ParticleBackground 
+        className="z-0" 
+        particleSizeRange={[1, 3]} 
+        particleSpeedRange={[0.5, 0.5]}
+        connectionDistance={100}
+        connectionOpacity={0.3}
+        opacity={0.3}
+        particleCount={50} //
+      />
 
       {/* 主要内容 */}
       <div className="relative z-10 flex flex-col min-h-screen">
