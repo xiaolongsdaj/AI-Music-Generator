@@ -1,4 +1,5 @@
 'use client'
+// 引入音乐生成器表单组件 - 支持多种模式配置
 import MusicGeneratorForm from '@/components/musicgeneratorui/MusicGeneratorForm';
 import Hero from '@/components/musicgeneratorui/Hero';
 import Description from '@/components/musicgeneratorui/Description';
@@ -150,7 +151,11 @@ export default function MusicGenerator() {
         
         {/* 内容区域 */}
         <div className="mt-8">
-          <MusicGeneratorForm />
+          {/* 使用灵感音乐模式的表单组件 */}
+          <MusicGeneratorForm 
+            mode="inspiration"
+            generateButtonText="开始创作音乐"
+          />
           {/* 将完整配置对象传递给组件，在组件内部解构 */}
           <Hero 
             config={{...musicGeneratorConfig.hero, className: `${musicGeneratorConfig.hero.className} scroll-reveal`}}

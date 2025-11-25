@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
       id: Date.now().toString(),
       userId: userId, // 添加用户ID
       name: params.name,
-      title: `${params.style.charAt(0).toUpperCase() + params.style.slice(1)} ${params.mood}`,
       description: params.description,
       style: params.style,
       mood: params.mood,

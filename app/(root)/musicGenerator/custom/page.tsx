@@ -2,8 +2,10 @@ import MusicGeneratorForm from "../../../../components/musicgeneratorui/MusicGen
 export default function CustomMusicGenerator() {
   return (
     <div>
-      <h1>自定义音乐</h1>
-      <MusicGeneratorForm />
+      <MusicGeneratorForm 
+            mode="custom"
+            generateButtonText="生成自定义音乐"
+          />
     </div>
   );
 }

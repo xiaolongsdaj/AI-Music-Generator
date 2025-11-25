@@ -2,7 +2,6 @@
 export interface MusicData {
   id: string;
   userId?: string; // 用户ID（可选，用于向后兼容）
-  title: string;
   name: string; // 音乐名称
   description: string;
   style: string;

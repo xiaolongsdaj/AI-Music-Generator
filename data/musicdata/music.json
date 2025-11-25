@@ -77,5 +77,33 @@
     "vocalType": "male",
     "audioUrl": "https://example.com/music_1764053508979.mp3",
     "createdAt": "2025-11-25T06:51:48.979Z"
+  },
+  {
+    "id": "1764070500790",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "name": "测试音乐",
+    "title": "Pop happy",
+    "description": "狂野狂野狂野狂野狂野狂野狂野狂野",
+    "style": "pop",
+    "mood": "happy",
+    "duration": 120,
+    "tempo": "medium",
+    "vocalType": "male",
+    "audioUrl": "https://example.com/music_1764070500790.mp3",
+    "createdAt": "2025-11-25T11:35:00.790Z"
+  },
+  {
+    "id": "1764070544224",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "name": "测似22221111",
+    "title": "Pop happy",
+    "description": "哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈",
+    "style": "pop",
+    "mood": "happy",
+    "duration": 15,
+    "tempo": "medium",
+    "vocalType": "female",
+    "audioUrl": "https://example.com/music_1764070544224.mp3",
+    "createdAt": "2025-11-25T11:35:44.224Z"
   }
 ]
