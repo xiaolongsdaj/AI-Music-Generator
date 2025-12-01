@@ -12,10 +12,12 @@ export default function LeftSidebar() {
   const router = useRouter();
   const { userId } = useAuth();
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [userInfo, setUserInfo] = useState<any>({});
   
-  // 判断是否在音乐生成器页面
-  const isMusicGeneratorPage = pathname.includes('/musicGenerator');
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+  useEffect(()=>{
+    setUserInfo(JSON.parse(localStorage.getItem('userInfo') || '{}'))
+  },[userId])
+  
   // 获取订阅信息
   useEffect(() => {
     if (userId) {
@@ -38,13 +40,9 @@ export default function LeftSidebar() {
       getSubscription();
     }
   }, [userId]);
-  
-  // 从constants导入的音乐侧边栏链接配置已在上方导入
 
   return (
-      <section className={`custom-scrollbar h-full transition-all duration-300 ease-in-out flex flex-col ${isMusicGeneratorPage ? 'w-14 md:w-64 bg-gray-900 border-r border-gray-800' : 'w-full'}`}>
-        {isMusicGeneratorPage ? (
-          // 音乐生成器侧边栏 - 确保所有内容完整显示
+      <section className={`custom-scrollbar h-full transition-all duration-300 ease-in-out flex flex-col 'w-14 md:w-64 bg-gray-900 border-r border-gray-800'}`}>
           <div className="p-4 flex flex-col h-full">
             <div className="flex flex-col items-center md:items-start gap-8 h-full">
               {/* 侧边栏标题（仅在中等屏幕及以上显示） */}
@@ -128,40 +126,6 @@ export default function LeftSidebar() {
               </div>
             </div>
           </div>
-        ) : (
-          // 全局侧边栏
-          <div className='flex w-full flex-1 flex-col gap-6 px-0 '>
-            {sidebarLinks.map((link) => {
-              const isActive=(pathname.includes(link.route)&&link.route.length>1)||pathname===link.route;
-
-              return(
-                <Link
-                  key={link.label}
-                  href={link.route}
-                  className={`leftsidebar_link ${isActive ? 'bg-blue-900/30 text-blue-400' : ''} no-underline flex items-center justify-center lg:justify-start p-2 rounded-lg transition-all duration-300 hover:bg-gray-800/50 w-full ease-in-out px-0`}>
-                  <link.imgURL size={24} className={`${isActive ? 'text-blue-400' : 'text-gray-400'}`} />
-                  <p className={`${isActive ? 'text-blue-400' : 'text-light-1'} max-lg:hidden lg:ml-4`}>{link.label}</p>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-        
-        {/* 全局注销按钮（仅在非音乐生成器页面显示） */}
-        {!isMusicGeneratorPage && (
-          <div className='mt-10 px-2 flex justify-center md:px-4 lg:px-6'>
-            <SignedIn>
-              <SignOutButton redirectUrl="/sign-in">
-                <div className='flex cursor-pointer gap-2 lg:gap-5 p-2 justify-center mb-5 hover:bg-gray-800 rounded-lg transition-all duration-300 lg:w-full lg:p-4 w-full ease-in-out'>
-                  <div className='flex items-center justify-center'>
-                    <LogOut size={24} className="text-gray-400" />
-                  </div>  
-                  <p className='text-light-2 max-lg:hidden text-gray-400 lg:block'>Logout</p>
-                </div>
-              </SignOutButton>
-            </SignedIn>
-          </div>
-        )}
       </section>
     )
 }

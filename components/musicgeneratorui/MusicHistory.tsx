@@ -14,7 +14,7 @@ export interface MusicHistoryProps {
 
 const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
   // 使用统一的认证 Hook
-  const { getToken, checkAuth } = useAuth();
+  const { getToken, userId } = useAuth();
   
   const [musicHistory, setMusicHistory] = useState<MusicData[]>([]);
   const [currentMusic, setCurrentMusic] = useState<MusicData | null>(null);
@@ -36,7 +36,7 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
   useEffect(() => {
     const fetchMusicHistory = async () => {
       // 检查是否已登录（使用统一的认证检查）
-      if (!checkAuth()) {
+      if (!userId) {
         setLoading(false);
         setMusicHistory([]);
         return;
@@ -69,7 +69,7 @@ const MusicHistory: React.FC<MusicHistoryProps> = ({ onSelectMusic }) => {
     };
     
     fetchMusicHistory();
-  }, [musicHistory]);
+  }, [userId]);
   
   const handleSelectMusic = (music: MusicData) => {
     setCurrentMusic(music);

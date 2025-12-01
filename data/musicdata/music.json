@@ -568,5 +568,31 @@
     "vocalType": "male",
     "audioUrl": "https://example.com/music_1764412935761.mp3",
     "createdAt": "2025-11-29T10:42:15.761Z"
+  },
+  {
+    "id": "1764561212929",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "name": "黑凤梨",
+    "description": "gggggdhahhd",
+    "style": "pop",
+    "mood": "happy",
+    "duration": 15,
+    "tempo": "medium",
+    "vocalType": "random",
+    "audioUrl": "https://example.com/music_1764561212929.mp3",
+    "createdAt": "2025-12-01T03:53:32.929Z"
+  },
+  {
+    "id": "1764572139988",
+    "userId": "user_35XctvhHcutkJCDVJZFZkG4vhdl",
+    "name": "测似2222",
+    "description": "gggggggggggg",
+    "style": "pop",
+    "mood": "happy",
+    "duration": 15,
+    "tempo": "medium",
+    "vocalType": "random",
+    "audioUrl": "https://example.com/music_1764572139988.mp3",
+    "createdAt": "2025-12-01T06:55:39.988Z"
   }
 ]

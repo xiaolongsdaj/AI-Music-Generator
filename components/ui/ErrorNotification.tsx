@@ -92,7 +92,7 @@ const ErrorNotification: React.FC<ErrorNotificationProps> = ({
 
   return (
     <div 
-      className={`max-w-md mx-auto mt-4 p-4 ${styles.container} border rounded-lg shadow-lg ${className}`}
+      className={`fixed top-0 left-0 right-0 max-w-md mx-auto mt-4 p-4 ${styles.container} border rounded-lg shadow-lg z-50 ${className}`}
       role="alert"
       aria-live="assertive"
     >

@@ -39,162 +39,42 @@ export default function FAQ({ config }: FAQProps) {
   };
 
   return (
-    <>
-      <style jsx>{`
-        /* FAQ组件样式 */
-        .faq-section {
-          margin-bottom: 5rem;
-          padding: 1.5rem;
-          background-color: rgba(17, 24, 39, 0.7);
-          backdrop-filter: blur(8px);
-          border-radius: 1rem;
-          border: 1px solid rgba(75, 85, 99, 0.5);
-          opacity: 1;
-          transform: none;
-        }
-        
-        @media (min-width: 768px) {
-          .faq-section {
-            padding: 2.5rem;
-          }
-        }
-        
-        .section-header {
-          margin-bottom: 2.5rem;
-          text-align: center;
-        }
-        
-        .section-title {
-          font-size: 2rem;
-          font-weight: bold;
-          margin-bottom: 1rem;
-          background: linear-gradient(to right, #60a5fa, #a78bfa);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-        }
-        
-        .section-subtitle {
-          color: #d1d5db;
-          max-width: 48rem;
-          margin-left: auto;
-          margin-right: auto;
-        }
-        
-        .faq-container {
-          max-width: 48rem;
-          margin-left: auto;
-          margin-right: auto;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        
-        .faq-item {
-          border: 1px solid rgba(107, 114, 128, 0.5);
-          border-radius: 0.5rem;
-          overflow: hidden;
-          background-color: rgba(17, 24, 39, 1);
-        }
-        
-        .faq-question {
-          width: 100%;
-          text-align: left;
-          padding: 1rem 1.5rem;
-          background-color: rgba(31, 41, 55, 0.5);
-          border: none;
-          cursor: pointer;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          transition: background-color 0.3s ease;
-        }
-        
-        .faq-question:hover {
-          background-color: rgba(31, 41, 55, 0.8);
-        }
-        
-        .question-content {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-        
-        .question-text {
-          font-weight: 500;
-          color: white;
-          font-size: 1.125rem;
-        }
-        
-        .arrow-icon {
-          width: 1.25rem;
-          height: 1.25rem;
-          color: #9ca3af;
-          transition: transform 0.3s ease;
-        }
-        
-        .arrow-icon.rotated {
-          transform: rotate(180deg);
-          color: #d1d5db;
-        }
-        
-        .faq-answer {
-          padding: 0 1.5rem;
-          background-color: rgba(17, 24, 39, 0.3);
-          color: #d1d5db;
-          max-height: 0;
-          overflow: hidden;
-          transition: all 0.3s ease;
-          border-top: 1px solid rgba(55, 65, 81, 1);
-          opacity: 0;
-        }
-        
-        .faq-answer.open {
-          max-height: 24rem;
-          padding: 1rem 1.5rem;
-          opacity: 1;
-        }
-      `}</style>
-      
-      <section className="faq-section">
-        <div className="section-header">
-          <h2 className="section-title">
-            <HelpCircle className="w-8 h-8 text-blue-400" />
-            {config.title}
-          </h2>
-          <p className="section-subtitle">{config.description}</p>
-        </div>
+    <section className="mb-20 p-6 md:p-10 bg-gray-900/70 backdrop-blur-md rounded-xl border border-gray-700/50">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent flex items-center justify-center gap-2">
+          <HelpCircle className="w-8 h-8 text-blue-400" />
+          {config.title}
+        </h2>
+        <p className="text-gray-300 max-w-4xl mx-auto">{config.description}</p>
+      </div>
 
-        <div className="faq-container">
-          {transformedItems.map((item, index) => {
-            const iconColor = iconColors[index % iconColors.length];
-            return (
-              <div key={item.id} className="faq-item">
-                <button
-                  className="faq-question"
-                  onClick={() => toggleQuestion(item.id)}
-                  style={{ backgroundColor: '#111827', color: 'white', border: 'none', outline: 'none' }}
-                >
-                  <div className="question-content">
-                    <Music className={`w-5 h-5 ${iconColor}`} />
-                    <span className="question-text">{item.question}</span>
-                  </div>
-                  <ChevronDown 
-                    className={`arrow-icon ${openQuestion === item.id ? 'rotated' : ''}`} 
-                  />
-                </button>
-                <div className={`faq-answer ${openQuestion === item.id ? 'open' : ''}`}>
-                  <div className="pl-8">{item.answer}</div>
+      <div className="max-w-4xl mx-auto flex flex-col gap-4">
+        {transformedItems.map((item, index) => {
+          const iconColor = iconColors[index % iconColors.length];
+          const isOpen = openQuestion === item.id;
+          
+          return (
+            <div key={item.id} className="border border-gray-600/50 rounded-lg overflow-hidden bg-gray-900">
+              <button
+                className="w-full text-left p-4 px-6 bg-gray-800/50 hover:bg-gray-800/80 transition-all duration-300 flex justify-between items-center"
+                onClick={() => toggleQuestion(item.id)}
+                style={{ border: 'none', outline: 'none' }}
+              >
+                <div className="flex items-center gap-3">
+                  <Music className={`w-5 h-5 ${iconColor}`} />
+                  <span className="font-medium text-white text-lg">{item.question}</span>
                 </div>
+                <ChevronDown 
+                  className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-gray-300' : ''}`} 
+                />
+              </button>
+              <div className={`px-6 bg-gray-900/30 text-gray-300 overflow-hidden transition-all duration-300 border-t border-gray-700 ${isOpen ? 'max-h-[60rem] py-4 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="pl-8">{item.answer}</div>
               </div>
-            );
-          })}
-        </div>
-      </section>
-    </>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
