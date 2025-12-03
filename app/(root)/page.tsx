@@ -20,7 +20,11 @@ export default function Home() {
     createdAt: user?.createdAt?.toISOString() || undefined,
     lastSignInAt: user?.lastSignInAt?.toISOString() || undefined,
   }
-  localStorage.setItem('userInfo', JSON.stringify(userInfo));
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
+    }
+  }, [user, userInfo]);
   
 
   // 鼠标跟踪效果
